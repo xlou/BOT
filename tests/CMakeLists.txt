@@ -7,15 +7,19 @@ SET(VIGRA_INSTALL_PATH "~/local" CACHE PATH "Additional install path for vigra")
 SET(HDF5_INSTALL_PATH "~/local" CACHE PATH "Additional install path for HDF5")
 SET(VIGRANUMPY_EXTENSIONS_INSTALL_PATH "~/local" CACHE PATH "Additional install path for vigranumpy-extensions")
 SET(CPLEX_BASE_PATH "~/local" CACHE PATH "Additional install path for cplex")
+SET(CONCERT_BASE_PATH "~/local" CACHE PATH "Additional install path for concert")
 SET(CPLEX_SYSTEM "x86-64_sles10_4.1" CACHE PATH "Specify the system of cplex")
 SET(CPLEX_LIBFORMAT "static_pic" CACHE PATH "Specify the library format of cplex")
+
+message(${CPLEX_BASE_PATH})
+message(${CONCERT_BASE_PATH})
 
 INCLUDE_DIRECTORIES(
     ${VIGRA_INSTALL_PATH}/include
     ${HDF5_INSTALL_PATH}/include
     ${VIGRANUMPY_EXTENSIONS_INSTALL_PATH}
-    ${CPLEX_BASE_PATH}/cplex/include
-    ${CPLEX_BASE_PATH}/concert/include
+    ${CPLEX_BASE_PATH}/include
+    ${CONCERT_BASE_PATH}/include
     ../include
     ../external)
 
@@ -23,8 +27,8 @@ INCLUDE_DIRECTORIES(
 LINK_DIRECTORIES(
     ${VIGRA_INSTALL_PATH}/lib
     ${HDF5_INSTALL_PATH}/lib
-    ${CPLEX_BASE_PATH}/cplex/lib/${CPLEX_SYSTEM}/${CPLEX_LIBFORMAT}
-    ${CPLEX_BASE_PATH}/concert/lib/${CPLEX_SYSTEM}/${CPLEX_LIBFORMAT})
+    ${CPLEX_BASE_PATH}/lib/${CPLEX_SYSTEM}/${CPLEX_LIBFORMAT}
+    ${CONCERT_BASE_PATH}/lib/${CPLEX_SYSTEM}/${CPLEX_LIBFORMAT})
 
 file(GLOB BOT_ALL_SOURCE
     "../include/*.hxx"
@@ -105,4 +109,4 @@ ADD_EXECUTABLE(test-CplexSolver
 SET_TARGET_PROPERTIES(test-CplexSolver PROPERTIES LINK_FLAGS "-lm -pthread")
 TARGET_LINK_LIBRARIES(test-CplexSolver ilocplex cplex concert)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -m64 -O -fPIC -fexceptions -DNDEBUG -DIL_STD")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O -fPIC -fexceptions -DNDEBUG -DIL_STD")
