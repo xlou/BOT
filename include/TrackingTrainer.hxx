@@ -47,6 +47,7 @@
 #include "FramePair.hxx"
 #include "HammingLossFunction.hxx"
 #include "CPLEXSolverSystem.hxx"
+#include "TrackingPredictor.hxx"
 
 using namespace vigra::linalg;
 
