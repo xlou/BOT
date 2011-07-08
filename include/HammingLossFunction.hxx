@@ -65,7 +65,7 @@ public:
 	 */
     HammingLossFunction() {};
 
-	/*! Computes the loss
+	/*! Computes the normalized Hamming distance between two binary vectors.
      *  @param z The ground truth as a vector of Matrix2D
      *  @param z_hat The prediction as a vector of Matrix2D
      *  @return MatrixElem The loss as a MatrixElem value
@@ -74,26 +74,14 @@ public:
         const Solution& z, 
         const Solution& z_hat)
     {
-        MatrixElem l = 0;
-        MatrixElem sum = 0;
-        for (int32 ind = 0; ind < z.size(); ind ++) {
-            Matrix2D tmp = abs(z_hat[ind] - z[ind]);
-            l += std::accumulate(
-                tmp.begin(), 
-                tmp.end(), 
-                static_cast<MatrixElem >(0));
-            sum += std::accumulate(
-                z[ind].begin(), 
-                z[ind].end(), 
-                static_cast<MatrixElem >(0));
-        }
 
-        l /= sum;
+		MatrixElem l;
+		operator()(z, z_hat, l);
 
         return l;
     };
 
-	/*! Computes the loss
+	/*! Computes the normalized Hamming distance between two binary vectors.
      *  @param z The ground truth as a vector of Matrix2D
      *  @param z_hat The prediction as a vector of Matrix2D
      *  @param loss The return loss as a MatrixElem value
@@ -111,17 +99,14 @@ public:
                 tmp.begin(), 
                 tmp.end(), 
                 static_cast<MatrixElem >(0));
-            sum += std::accumulate(
-                z[ind].begin(), 
-                z[ind].end(), 
-                static_cast<MatrixElem >(0));
+            sum += z[ind].size(0);
         }
 
         l /= sum;
     };
 
 	/*! Computes the coefficients of the loss as a penalty function of a 
-     *  prediction. The loss, given a prediction z_hat, is [1 + <b, z_hat>].
+     *  prediction. The loss, given a prediction z_hat, is [numOnes/sum + <b, z_hat>].
      *  @param z The ground truth as a vector of Matrix2D
      *  @pram b The coefficients of the loss as a matrix
 	 */
@@ -129,10 +114,18 @@ public:
         const std::vector<Matrix2D >& z, 
         std::vector<Matrix2D >& b)
     {
-        MatrixElem sum = VigraSTLInterface::accumulate(z);
+        MatrixElem numOnes = VigraSTLInterface::accumulate(z);
+
+        MatrixElem sum = 0;
+        for (int32 ind = 0; ind < z.size(); ind ++)
+            sum += z[ind].size(0);
+
         b.clear();
-        for (int32 ind = 0; ind < z.size(); ind ++) 
-            b.push_back(-z[ind] / sum);
+
+        for (int32 ind = 0; ind < z.size(); ind ++) {
+			Matrix2D one(Shape2D(z[ind].size(0), 1), static_cast<MatrixElem>(1));
+            b.push_back((one - z[ind]*static_cast<MatrixElem>(2))/sum);
+		}
     };
 };
 
