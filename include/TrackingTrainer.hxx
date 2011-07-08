@@ -205,6 +205,25 @@ public:
                 std::vector<Matrix2D > solution;
                 predictor(framepair, weights, solution, null_vector);
                 Losses[indTr] = lossFunc.loss(solutionsTr[indTr], solution);
+
+				Matrix2D PhiTr = framepair.compatibility_vector(solutionsTr[indTr]);
+				Matrix2D Phi   = framepair.compatibility_vector(solution);
+				Matrix2D Psi   = Phi - PhiTr;
+				MatrixElem diff = (transpose(W)*Psi)(0, 0);
+
+				Losses[indTr] += diff;
+
+				std::cout << "*****************************************" << std::endl;
+				//std::cout << "W" << std::endl << W << std::endl;
+				//std::cout << "PhiTr" << std::endl << PhiTr << std::endl;
+				//std::cout << "Phi" << std::endl << Phi << std::endl;
+				//std::cout << "Psi" << std::endl << Psi << std::endl;
+				//std::cout << "diff" << std::endl << (transpose(W)*Psi) << std::endl;
+				std::cout << "loss" << std::endl
+				          << diff << " + "
+				          << lossFunc.loss(solutionsTr[indTr], solution) << " = "
+						  << Losses[indTr] << std::endl;
+				std::cout << "*****************************************" << std::endl;
             }
             matLosses = (matLosses.size() == 0) ? Losses : joinHorizontally(matLosses, Losses);
             if (verbose)
