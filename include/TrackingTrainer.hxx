@@ -190,6 +190,7 @@ public:
             }
             A /= static_cast<MatrixElem >(nTr);
             B /= static_cast<MatrixElem >(nTr);
+			B -= dot(W, A);
             if (verbose)
                 std::cout << "\t\tGradients and offsets computed." << std::endl;
 
