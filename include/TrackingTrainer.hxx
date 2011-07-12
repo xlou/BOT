@@ -205,16 +205,24 @@ public:
             // perform prediction using the new weights
             fold_weights(W, weights);
             Matrix2D Losses(Shape2D(nTr, 1), static_cast<MatrixElem >(0));
+			// do this for every training sample to get the current value of
+			// l(x,y,w_t) -- this will be used later to get the current value of
+			// J(w_t)
             for (int32 indTr = 0; indTr < nTr; indTr ++) {
+
                 const FramePair& framepair = framepairs[times[indTr]];
+
+				// get y* = argmax_y' l(x_i,y_i,w_t)
                 std::vector<Matrix2D > solution;
-                predictor(framepair, weights, solution, null_vector);
+                predictor(framepair, weights, solution, solutionsTr[indTr]);
+
+				// compute l_i = l(x_i,y*,w_t)
                 Losses[indTr] = lossFunc.loss(solutionsTr[indTr], solution);
 
 				Matrix2D PhiTr = framepair.compatibility_vector(solutionsTr[indTr]);
 				Matrix2D Phi   = framepair.compatibility_vector(solution);
 				Matrix2D Psi   = Phi - PhiTr;
-				MatrixElem diff = (transpose(W)*Psi)(0, 0);
+				MatrixElem diff = dot(W,Psi);
 
 				Losses[indTr] += diff;
 
