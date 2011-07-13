@@ -72,7 +72,7 @@ public:
 	 */
     MatrixElem loss(
         const Solution& z, 
-        const Solution& z_hat)
+        const Solution& z_hat) const
     {
 
 		MatrixElem l;
@@ -89,7 +89,7 @@ public:
     void operator()(
         const Solution& z, 
         const Solution& z_hat,
-        MatrixElem& l)
+        MatrixElem& l) const
     {
         l = 0;
         MatrixElem sum = 0;
@@ -112,7 +112,7 @@ public:
 	 */
     void operator()(
         const std::vector<Matrix2D >& z, 
-        std::vector<Matrix2D >& b)
+        std::vector<Matrix2D >& b) const
     {
         MatrixElem numOnes = VigraSTLInterface::accumulate(z);
 
