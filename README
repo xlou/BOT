@@ -1,0 +1,8 @@
+Biomedical Object Tracking (BOT) is a C++ library for tracking massive objects in time lapse biological experiments. It features (I) object association based pairwise tracking, (II) interactive structured learning for optimal feature parametrization, (III) generic and extensible feature sets, (IV) configurable workflow for different applications (e.g. tracking cells and tracking worm) and (V) a user-friendly GUI based on the Interactive Learning and Segmentation Toolkit (ilastik). In this report, we provide the technical details on the implementation of the aforementioned algorithms, features and configurable workflows as well as the integration of this library with ilastik.
+
+We are very grateful for the following software/code packages that BOT depends on: 
+1. The IBM Academic Initiative allows us to access IBM ILOG CPLEX free of charge.
+2. The SimpleIni library allows us to efficiently read and write INI-style configuration files.
+3. The FastEMD library provides fast earth mover¡¯s distance computation.
+
+(C) Xinghua Lou (xinghua.lou@iwr.uni-heidelberg.de, xinghua.lou@gmail.com)
