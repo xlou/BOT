@@ -3,6 +3,6 @@ Biomedical Object Tracking (BOT) is a C++ library for tracking massive objects i
 We are very grateful for the following software/code packages that BOT depends on: 
 1. The IBM Academic Initiative allows us to access IBM ILOG CPLEX free of charge.
 2. The SimpleIni library allows us to efficiently read and write INI-style configuration files.
-3. The FastEMD library provides fast earth mover¡¯s distance computation.
+3. The FastEMD library provides fast earth mover's distance computation.
 
 (C) Xinghua Lou (xinghua.lou@iwr.uni-heidelberg.de, xinghua.lou@gmail.com)
