@@ -104,8 +104,10 @@ public:
         Matrix2D& x) const
     {
         IloNumArray vals(env);
+		std::cout << "getting values..." << std::endl;
         cplex.getValues(vals, vars);
         x.reshape(Shape2D(vals.getSize(), 1), static_cast<MatrixElem >(0));
+		std::cout << "extracting " << vals.getSize() << " variables" << std::endl;
         for (int32 ind = 0; ind < vals.getSize(); ind ++)
             x[ind] = static_cast<MatrixElem >(vals[ind]);
     };
@@ -181,6 +183,10 @@ public:
             IloModel model(env);
             IloNumVarArray vars(env, f.size(), 0, 1, ILOINT);
 
+			std::cout << "setting up lp: " << f.size(0) << " variables, "
+			          << bineq.size(0) << " inequalities, "
+			          << beq.size(0) << " equalities" << std::endl;
+
             // add the constraints
             Matrix2D lb;
             setup_linear_constraints(Aineq, lb, bineq, vars, model);   // inequality
@@ -189,9 +195,18 @@ public:
             // add the objective functions
             setup_lp_objective(f, vars, model);
 
+			// make sure all variables have been added to the model
+			for (int i = 0; i < f.size(0); i++)
+				model.add(IloRange(env, vars[i].getLB(), vars[i], vars[i].getUB()));
+
+			std::cout << "solving integer linera program" << std::endl;
+
             // call cplex to solve it
             IloCplex cplex(model);
             cplex.solve();
+
+			std::cout << "done: " << cplex.getStatus() << std::endl;
+			std::cout << "querying result status" << std::endl;
 
             // get cplex status
             if (cplex.getStatus() == IloAlgorithm::Optimal)
@@ -201,11 +216,13 @@ public:
                 std::cout << "cplex.getStatus() gives: " << cplex.getStatus() << std::endl;
             }
 
+			std::cout << "extracting solution" << std::endl;
+
             // extract the solution
             extract_solution(cplex, vars, x);
         }
         catch (IloException& e) {
-            msg = "*Warning* Concert exception caught: ";
+            msg = std::string("*Warning* Concert exception caught: ") + e.getMessage();
         }
         catch (...) {
             msg = "*Warning* Unknown exception caught";
@@ -315,6 +332,10 @@ public:
             // add the objective functions
             setup_qp_objective(H, f, vars, model);
 
+			// make sure all variables have been added to the model
+			for (int i = 0; i < f.size(0); i++)
+				model.add(IloRange(env, vars[i].getLB(), vars[i], vars[i].getUB()));
+
             // call cplex to solve it
             IloCplex cplex(model);
             cplex.solve();
@@ -328,7 +349,7 @@ public:
             extract_solution(cplex, vars, x);
         }
         catch (IloException& e) {
-            msg = "*Warning* Concert exception caught: ";
+            msg = std::string("*Warning* Concert exception caught: ") + e.getMessage();
         }
         catch (...) {
             msg = "*Warning* Unknown exception caught";
