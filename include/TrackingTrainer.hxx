@@ -105,15 +105,19 @@ public:
         Matrix2D& W)
     {
         Matrix2D Alpha, empty_matrix;
-        Matrix2D Aineq(Shape2D(1, matB.size()), static_cast<MatrixElem >(1));
-        Matrix2D bineq(Shape2D(1, 1), static_cast<MatrixElem >(1));
+        Matrix2D Aeq(Shape2D(1, matB.size()), static_cast<MatrixElem >(1));
+        Matrix2D beq(Shape2D(1, 1), static_cast<MatrixElem >(1));
         Matrix2D lb(Shape2D(matB.size(), 1), static_cast<MatrixElem >(0));
-        solver.solve_qp(
+
+        std::string message = solver.solve_qp(
             transpose(matA) * matA / lambda_, -matB, 
-            Aineq, bineq, 
             empty_matrix, empty_matrix, 
+            Aeq, beq, 
             lb, empty_matrix, 
             empty_matrix, Alpha);
+
+		if (verbose)
+			std::cout << "Solver returned: " << message << std::endl;
 
         W = -matA * Alpha / lambda_;
     };
