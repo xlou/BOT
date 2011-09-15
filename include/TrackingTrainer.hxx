@@ -59,7 +59,7 @@ namespace bot
 class TrackingTrainer
 {
 public:
-	/*! Default constructor with default initiliazation of the parameters
+    /*! Default constructor with default initiliazation of the parameters
 	 *
 	 */
     TrackingTrainer()
@@ -210,7 +210,7 @@ public:
                 std::cout << "\t\tEmpirical loss updated." << std::endl;
 
             // compute the approximation gap
-            double reg = squaredNorm(W);
+            double reg = squaredNorm(W) * 0.5;
             Matrix2D P = transpose(matA) * W + transpose(matB);
             double approxJ = lambda_ * reg + *std::max_element(P.begin(), P.end());
             double J_ = lambda_ * reg + std::accumulate(Losses.begin(), Losses.end(), static_cast<MatrixElem >(0)) / static_cast<MatrixElem >(Losses.size());
