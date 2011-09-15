@@ -10,4 +10,7 @@ Brieﬂy, BOT features:
 This library is the accompanying code for our paper:
 Xinghua Lou, Fred A. Hamprecht. Structured Learning for Cell Tracking. In Twenty-Fifth Annual Conference on Neural Information Processing Systems, 2011. (NIPS'11)
 
+To find the paper as well as the design document and user guide, please visit 
+http://hci.iwr.uni-heidelberg.de/Staff/xlou/research/tracking.html
+
 (C) Xinghua Lou (xinghua.lou@iwr.uni-heidelberg.de, xinghua.lou@gmail.com)
