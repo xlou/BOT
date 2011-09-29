@@ -44,6 +44,7 @@
 #define __NEAREST_NEIGHBOR_GENERATOR_HXX__
 
 #include <algorithm>
+#include <stdexcept>
 #include "TypeDefinition.hxx"
 #include "VigraSTLInterface.hxx"
 #include "InputOutput.hxx"
@@ -109,15 +110,23 @@ public:
     };
 
 	/*! Return the kth smallest value in a vector
-     *  @param vec The input vector
+         *
+         *  If k is greater than the vector size, the overall smallest value is returned.
+         *  @param vec The input vector
 	 *  @return The value of the kth smallest value in a vector
 	 */
     template<class t_elem >
     t_elem kth_smallest_value(const std::vector<t_elem >& vec)
     {
+	size_t myk;
+	size_t vec_size = vec.size();
+	if( vec_size < 1 ) {
+	    throw std::runtime_error("NearestNeighborGenerator::kth_smallest_value(): vector has to contain at leas one element");
+	}
+	k() < vec_size ? myk = k() : myk = vec_size; 
         std::vector<t_elem > vec_ = vec;
-        std::nth_element(vec_.begin(), vec_.begin() + k(), vec_.end());
-        return vec_[k()];
+        std::nth_element(vec_.begin(), vec_.begin() + myk, vec_.end());
+        return vec_[myk];
     };
 
 	/*! Return a list of paired indices that satisfies the neighborhood constraints
