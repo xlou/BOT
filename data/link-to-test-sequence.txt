@@ -1,0 +1,5 @@
+This test sequence is too huge to put on github.
+
+Please click the following link to download it and put in ./data:
+http://hci.iwr.uni-heidelberg.de/Staff/xlou/export/dcelliq-sequence-training.h5
+
