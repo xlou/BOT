@@ -146,10 +146,12 @@ public:
             }
 
             // append to the party's coords, values and labels
-            pixels_ = joinVertically(pixels_, 
-                VigraSTLInterface::vector_to_matrix<Matrix2D, MatrixElem >(pixels_vec));
-            values_ = joinVertically(values_, VigraSTLInterface::vector_to_matrix<MatrixElem >(values_vec));
-            labels_ = joinVertically(labels_, VigraSTLInterface::vector_to_matrix<MatrixElem >(labels_vec));
+            if (pixels_vec.size() > 0)
+	        pixels_ = joinVertically(pixels_, VigraSTLInterface::vector_to_matrix<Matrix2D, MatrixElem >(pixels_vec));
+            if (values_vec.size() > 0)
+            	values_ = joinVertically(values_, VigraSTLInterface::vector_to_matrix<MatrixElem >(values_vec));
+            if (labels_vec.size() > 0)
+           	labels_ = joinVertically(labels_, VigraSTLInterface::vector_to_matrix<MatrixElem >(labels_vec));
             
             // create the party object
             multiplets.push_back(Multiplet(id_party ++, id1, id2, pixels_, values_, labels_));

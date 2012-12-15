@@ -123,10 +123,11 @@ public:
 	if( vec_size < 1 ) {
 	    throw std::runtime_error("NearestNeighborGenerator::kth_smallest_value(): vector has to contain at leas one element");
 	}
-	k() < vec_size ? myk = k() : myk = vec_size; 
+	int n_neighbors = vec.size() - (int) std::count(vec.begin(), vec.end(), LARGEST_DISTANCE);
+	int k_min = std::min(k(), n_neighbors);
         std::vector<t_elem > vec_ = vec;
-        std::nth_element(vec_.begin(), vec_.begin() + myk, vec_.end());
-        return vec_[myk];
+        std::nth_element(vec_.begin(), vec_.begin() + k_min, vec_.end());
+        return vec_[k_min];
     };
 
 	/*! Return a list of paired indices that satisfies the neighborhood constraints
@@ -137,6 +138,8 @@ public:
     std::vector<IDPair > operator() (const Matrix2D& pts1, const Matrix2D& pts2)
     {
         std::vector<IDPair > id_pairs;
+	if (pts1.elementCount() == 0 || pts2.elementCount() == 0)
+		return id_pairs;
 
         // compute the distance matrix: think binomial ¨C (a-b)^2=a^2-2ab+b^2
         Matrix2D::difference_type shape1(pts1.shape(0), 1);
@@ -161,6 +164,9 @@ public:
         
         // determine the k nearest neighbors with d_max distance thresholding
         for (int32 row = 0; row < d_mat.shape(0); row ++) {
+		// if having less than k neighbors, no need to compute, add them all
+//		if (d_mat.shape(1) - row - 1 <= k())
+//			continue;
             Matrix2D::view_type view = rowVector(d_mat, row);
             std::vector<MatrixElem > vec = VigraSTLInterface::view_to_vector<MatrixElem >(view);
             MatrixElem d_max_k = std::min(d_max(), kth_smallest_value(vec));

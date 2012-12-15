@@ -95,6 +95,9 @@ public:
         const bool full = false) 
     {
         Hypotheses hypotheses;
+//	if (objects1.size() == 0 || objects2.size() == 0)
+//		return hypotheses;
+
         if (full) {
             for (Index ind1 = 0; ind1 < objects1.size(); ind1 ++)
                 for (Index ind2 = 0; ind2 < objects2.size(); ind2 ++)

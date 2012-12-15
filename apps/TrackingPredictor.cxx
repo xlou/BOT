@@ -52,10 +52,17 @@
 
 using namespace bot;
 
-int main()
+int main(int argc, char* argv[])
 {
+        if (argc != 3) {
+                std::cerr << "********Input error, please use********" << std::endl <<
+                "                  ./TrackPredictor [hdf5 data file] [ini configuration file]" << std::endl;
+                return EXIT_FAILURE;
+        }
+
+
     // load the image sequence
-    std::string filename("../data/dcelliq-sequence-training.h5");
+    std::string filename(argv[1]);
     std::vector<Matrix2D > images, segmentations;
     HDF5ReaderWriter::load(filename.c_str(), images, segmentations);
 
@@ -64,7 +71,7 @@ int main()
     std::cout << "****Context****" << std::endl << context << std::endl << std::endl;
 
     // load the configuration
-    HypothesisSpace space("../data/event-configuration-cell.ini");
+    HypothesisSpace space(argv[2]);
     EventConfiguration conf = space.configuration();
 
     // create singlets/muliplets and extract object features
@@ -116,5 +123,5 @@ int main()
     // save the solutions to the hdf file
     HDF5ReaderWriter::save(filename, framepairs, singlets_vec, multiplets_vec);
 
-    return 0;
+    return EXIT_FAILURE;
 }

@@ -1,10 +1,10 @@
 Despite the popular use of object association in many cell tracking problems, there has not been an open implementation of this method, let alone a well-designed library with high extensibility and standard interfaces. We attempt to address this situation by introducing BOT, a extensible C++ library for biomedical object tracking. Though initially designed for cell tracking, we hope to make BOT a generic algorithmic library adaptable to various biomedical tracking applications. 
 
-Brieﬂy, BOT features: 
-1. Solver - An efﬁcient pairwise object association solver based on integer linear programming (ILP); 
+Briefly, BOT features: 
+1. Solver - An efficient pairwise object association solver based on integer linear programming (ILP); 
 2. Feature - A rich set of generic features and extensible feature design using factory pattern; 
 3. Learning - Structured learning for high-dimensional feature parametrization; 
-4. Diversity - Conﬁgurable workﬂow for supporting diverse applications;
+4. Diversity - Confiurable workflow for supporting diverse applications;
 5. GUI - A user-friendly GUI by integration with the Interactive Learning and Segmentation Toolkit (ilastik, http://www.ilastik.org/).
 
 This library is the accompanying code for our paper:
@@ -12,5 +12,11 @@ Xinghua Lou, Fred A. Hamprecht. Structured Learning for Cell Tracking. In Twenty
 
 To find the paper as well as the design document and user guide, please visit 
 http://hci.iwr.uni-heidelberg.de/Staff/xlou/research/tracking.html
+or, take a look at ./doc.
+
+
+Note: This library has been compiled and tested under linux. If you find any problem compiling or running it under other platforms, please let the author know.
 
 (C) Xinghua Lou (xinghua.lou@iwr.uni-heidelberg.de, xinghua.lou@gmail.com)
+
+

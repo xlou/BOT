@@ -56,9 +56,15 @@
 
 using namespace bot;
 
-int main()
+int main(int argc, char* argv[])
 {
-    std::string filename("../data/dcelliq-sequence-training.h5");
+        if (argc != 3) {
+                std::cerr << "********Input error, please use********" << std::endl <<
+                "                  ./TrackPredictor [hdf5 data file] [ini configuration file]" << std::endl;
+		return EXIT_FAILURE;
+        }
+
+    std::string filename(argv[1]);
     // load the image sequence
     std::vector<Matrix2D > images, segmentations;
     TrainingData training;
@@ -72,7 +78,7 @@ int main()
     std::cout << "****Computing the Context****" << std::endl << context << std::endl << std::endl;
 
     // load the configuration
-    HypothesisSpace space("../data/event-configuration-cell.ini");
+    HypothesisSpace space(argv[2]);
     EventConfiguration conf = space.configuration();
 
     // create singlets/muliplets and extract object features
@@ -139,14 +145,16 @@ int main()
     std::cout << "Training returns: " << msg << std::endl;
     conf.weights() = weights;
 
-    // print the final weights
-    std::cout << "Learned weights: " << std::endl;
-    conf.print();
-
     // printe intermediate results: weights, epsilons, losses
+    std::cout << "************Intermediate output: **************" << std::endl;
     std::cout << "Weights: " << std::endl << trainer.weights() << std::endl << std::endl;
     std::cout << "Epsilons: " << std::endl << trainer.epsilons() << std::endl << std::endl;
     std::cout << "Losses: " << std::endl << trainer.losses() << std::endl << std::endl;
 
-    return 0;
+    // print the final weights
+    std::cout << "Learned weights: " << std::endl;
+    conf.print();
+
+
+    return EXIT_SUCCESS;
 }
