@@ -12,8 +12,8 @@ ADD_EXECUTABLE(test-cpp-factory
 
 # test tiff file reading
 IF(USE_TIFF)
-    ADD_EXECUTABLE(test-TiffReader tiffread.cxx ${BOT_ALL_SOURCE})
-    TARGET_LINK_LIBRARIES(test-TiffReader ${LIB_PREFIX}tiff)
+    ADD_EXECUTABLE(test-TIFFReaderWriter test-TIFFReaderWriter.cxx ${BOT_ALL_SOURCE})
+    TARGET_LINK_LIBRARIES(test-TIFFReaderWriter ${LIB_PREFIX}tiff)
 ENDIF(USE_TIFF)
 
 # test: bot hypothesis space

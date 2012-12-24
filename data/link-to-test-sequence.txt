@@ -1,5 +1,8 @@
 This test sequence is too huge to put on github.
 
-Please click the following link to download it and put in ./data:
+For tiff user, please click the following link to download it, put in ./data and unzip it:
+http://hci.iwr.uni-heidelberg.de/Staff/xlou/export/dcelliq-sequence-training-tiff.zip
+
+For HDF5 user, please click the following link to download it and put in ./data:
 http://hci.iwr.uni-heidelberg.de/Staff/xlou/export/dcelliq-sequence-training.h5
 
