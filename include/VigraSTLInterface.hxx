@@ -47,6 +47,7 @@
 #include <vector>
 #include <functional>
 #include <numeric>
+#include <algorithm>
 #include "vigra/multi_array.hxx"
 #include "objectFeatures.hxx"
 
@@ -115,6 +116,20 @@ public:
 
     	return tokens;
     };
+    
+	/*! Check if a string only contains spaces
+	 *  @param str The input string
+     *  @return true if the string is empty or only contains spaces
+	 */
+    static bool isblank(const std::string& str) {
+        if (str.empty())
+            return true;
+        for (int i=0; i<str.size(); i++) 
+            if (str[i] != ' ') 
+                return false;
+                
+        return true;
+    }
 
 	/*! Convert a std::string to tokens (with given separator) 
 	 *  @param str The input string
@@ -125,13 +140,18 @@ public:
     {
     	std::vector<t_elem > tokens;
     	std::string tmp = str;
+        std::string substr;
     	size_t pos = tmp.find_first_of(sep);
     	while (pos != std::string::npos) {
-    		tokens.push_back(static_cast<t_elem >(atof(tmp.substr(0, pos).c_str())));
-    		tmp = tmp.substr(pos+1, tmp.length());
+            // remove space in variable tmp
+            substr = tmp.substr(0, pos);
+    		if (!isblank(substr))
+                tokens.push_back(static_cast<t_elem >(atof(substr.c_str())));
+    		tmp = tmp.substr(pos+1, tmp.length());            
     		pos = tmp.find_first_of(sep);
     	}
-    	tokens.push_back(static_cast<t_elem >(atof(tmp.c_str())));
+        if (!isblank(tmp))
+            tokens.push_back(static_cast<t_elem >(atof(tmp.c_str())));
 
     	return tokens;
     };
@@ -264,7 +284,8 @@ public:
         return mat;
     };
 
-	/*! Fetch the values from a std::vector and fill them to a vigra::MultiArrayView
+	/*! Fetch the values from a std::vector and fill them to a vigra::MultiArrayView.
+     * Note that the return matrix is a column vector.
      *  @param view The std::vector object as the source
 	 *  @param mat A vigra::MultiArray object as the target
 	 */

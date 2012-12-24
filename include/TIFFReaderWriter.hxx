@@ -45,12 +45,21 @@
 
 #include <stdio.h>
 #include <vector>
+#include <iostream>
+#include <string>
 #include "tiffio.h"
 #include "TypeDefinition.hxx"
 #include "SolutionCoder.hxx"
 #include "TrainingData.hxx"
+#include "InputOutput.hxx"
+#include <dirent.h>
+#include <algorithm>
+#include <fstream>
+#include <vigra/matrix.hxx> 
+
 
 using namespace vigra::linalg;
+//using namespace std;
 
 namespace bot 
 {
@@ -62,11 +71,10 @@ namespace bot
 class TIFFReaderWriter
 {
 public:
-	static Matrix2D loadTiff(const std::string& file)
+	static bool loadTiff(const std::string& file, Matrix2D& image)
 	{
-		tsize_t row;    // Image height
-	    tsize_t col;    // Image width
-	    tsize_t bytes;  // Number of bytes per scanline
+		tsize_t row_t;    // Image height
+	    tsize_t col_t;    // Image width
 	    short bps;      // Number of bit per pixel
 	    TIFF* tifPtr;   // Pointer to TIFF structure
     	int zInd = 0;
@@ -75,182 +83,239 @@ public:
 	    tifPtr = TIFFOpen(file.c_str(), "r");
 
 	    // Access data
-		Matrix2D image;
 	    if (tifPtr == NULL) 
-			return image;
+			return false;
 
-		// Fixme: now we only read the first layer, 3d tiff stack is not supproted!!
+	    TIFFGetField(tifPtr, TIFFTAG_IMAGELENGTH, &row_t);
+	    TIFFGetField(tifPtr, TIFFTAG_IMAGEWIDTH, &col_t);
+	    TIFFGetField(tifPtr, TIFFTAG_BITSPERSAMPLE, &bps);
+		int row = static_cast<int >(row_t);
+		int col = static_cast<int >(col_t);
+
+		// Fixme: now we only read the first layer, 3d tiff stack is not supported!!
         do {
             zInd ++;
-   	        TIFFGetField(tifPtr, TIFFTAG_IMAGELENGTH, &row);
-       	    TIFFGetField(tifPtr, TIFFTAG_IMAGEWIDTH, &col);
-           	TIFFGetField(tifPtr,TIFFTAG_BITSPERSAMPLE, &bps);
-           	printf("\n\nImage %u size: %u x %u, bps=%u\n\n", zInd, row, col, bps);
 
 			// create output matrix
-			image = Matrix2D(Matrix2D::difference_type((int)row, (int)col));
+			image.reshape(Matrix2D::difference_type(row, col));
 
-			if (bps == 8) {
+			switch (bps) {
+			case 8:
+			{
 				// readin line by line
 				unsigned char* buf = static_cast<unsigned char* >(_TIFFmalloc(col));
-				std::cerr << "1" << std::endl;
-				for (int i = 0; i < (int)row; i++) {
-					std::cerr << "reading line: " << i << "/" << row << std::endl;
+				for (int i = 0; i < row; i++) {
 					TIFFReadScanline(tifPtr, buf, i, 0);
-					for (int j = 0; j < (int)col; j++)
+					for (int j = 0; j < col; j++)
 						image(i, j) = buf[j];
 				}
 				_TIFFfree(buf);
 			}
-			else if (bps == 16) {
+				break;
+			case 16: 
+			{
                 // readin line by line
-                uint16* buf = static_cast<uint16* >(_TIFFmalloc((int)col * sizeof(uint16)));
-                for (int i = 0; i < (int)row; i++) {
+                uint16* buf = static_cast<uint16* >(_TIFFmalloc(col * sizeof(uint16)));
+                for (int i = 0; i < row; i++) {
                     TIFFReadScanline(tifPtr, buf, i, 0);
-                    for (int j = 0; j < (int)col; j++)
+                    for (int j = 0; j < col; j++)
                         image(i, j) = buf[j];
 				}
 				_TIFFfree(buf);
 			}
-			else {
+				break;
+			default:
 				std::cerr << "Unsupproted file format!" << std::endl;
 			}
-			/*
-    	    if(ImageBuffer != NULL) {
-        	    for (i=0;i<row;i++) {
-            	    for(j=0;j<col;j++)
-                	    printf("%u ", ImageBuffer[i*col+j]);
-                    printf("\n");
-	            }
-    	    }
-
-	        if(ImageBuffer16 != NULL) {
-    	        for (i=0; i<row; i++) {
-        	        for(j=0; j<col; j++)
-                        printf("%u ", ImageBuffer16[i*col+j]);
-               	    printf("\n");
-	            }
-    	    }
-			*/
 		}
-    	while (TIFFReadDirectory(tifPtr) && zInd < 1);
+    	while (TIFFReadDirectory(tifPtr) && zInd < 1); // only read the first slice, need to be exteded in the future
 
-		return image;
+		return true;
 	}
 
-	static bool loadTiffDir(const std::vector<std::string >& files,
+	static bool loadTiffDir(const std::string& dir,
                    std::vector<Matrix2D >& matrices)
 	{
+		std::vector<std::string > files;
+		files = getFilesInDir(dir, ".tiff");
+		if (files.size() == 0)
+			 files = getFilesInDir(dir, ".tif");
+
+
+		for (int i=0; i<files.size(); i++) {
+			Matrix2D image;
+			loadTiff(files[i], image);
+			matrices.push_back(image);
+		}
+
 		return true;
 	}
 
-    /*! A static function that loads the raw images and segmentations
-     *  @param filename The path to the hdf5 file
-     *  @param images The raw images
-     *  @param segmentations The segmentations
-     *  @return Return true if no error occurs, false otherwise.
-     */
-    static bool load(const std::vector<std::string >& files, 
-                   std::vector<Matrix2D >& images,
-                   std::vector<Matrix2D >& segmentations) 
-    {
+    static bool loadTiffDir(const std::string& dir,
+					        std::vector<Matrix2D >& matrices, 
+							std::vector<std::string >& files)
+	{
+		files = getFilesInDir(dir, ".tiff");
+		if (files.size() == 0)
+			files = getFilesInDir(dir, ".tif");
+
+        for (int i=0; i<files.size(); i++) {
+			Matrix2D image;
+		    loadTiff(files[i], image);
+			matrices.push_back(image);
+		}
+ 
 		return true;
-    };
+	}
+	
+	static bool parseAnnotationLine(const std::string& line, Matrix2D& source, Matrix2D& target)
+	{
+		int pos = line.find_first_of("->");
+		if (pos == std::string::npos)
+			return false;
+
+		std::vector<MatrixElem > tokens;
+
+		// parse the part before "->", viz. source
+		tokens = VigraSTLInterface::string_to_vector<MatrixElem >(line.substr(0, pos));
+		source = VigraSTLInterface::vector_to_matrix<MatrixElem >(tokens);
+		
+		// parse the part after "->", viz. target
+		tokens = VigraSTLInterface::string_to_vector<MatrixElem >(line.substr(pos+2));
+		target = VigraSTLInterface::vector_to_matrix<MatrixElem >(tokens);
+		
+		return true;
+	};
 
     /*! A static function that loads the training data
      *  @param filename The path to the hdf5 file
      *  @param training The training data
      *  @return Return true if no error occurs, false otherwise.
      */
-    static bool load(const std::string& filename,
+    static bool loadAnnotationDir(const std::string& dir,
+		   const std::vector<std::string >& references,
                    TrainingData& training) 
     {
-        // load training data
-/*        vigra::HDF5File file(filename, vigra::HDF5File::Open);
-        try {
-            file.cd("/Training");
-            std::vector<std::string > dirs = file.ls();
-            for (int32 ind = 0; ind < dirs.size(); ind ++) {
-                int32 time = atoi(dirs[ind].c_str());
-                file.cd(dirs[ind]);
-                LabelAssociations associations; 
+		std::vector<std::string > files = getFilesInDir(dir, ".txt");
+		char buf[256];
 
-                std::vector<std::string > names = file.ls();
-                for (int32 n = 0; n < names.size(); n ++) {
-                    LabelAssociation association;
-                    association.name = names[n].substr(0, names[n].size()-1);
-                    file.cd(names[n]);
+		for (int i=0; i<files.size(); i++) {
+			int time = findRawFileIndex(references, files[i]);
+			std::cerr << "Annotation " << files[i] << " -> " << references[time] << std::endl;
+			// open file
+			std::ifstream ifs(files[i].c_str(), std::ifstream::in);
+			
+			// create object associations
+			LabelAssociations associations;
+			
+			// variables to store association for a single event
+			LabelAssociation association;
+			Matrix2D source;
+			Matrix2D target;
+			std::string name;
 
-                    {
-                        vigra::ArrayVector<hsize_t > shape = file.getDatasetShape("Source/Data");
-                        vigra::MultiArray<2, int32 > mat(Shape2D(shape[0], shape[1]), static_cast<int32 >(0));
-                        file.read<2, int32 >("Source/Data", mat);
-                        association.source = Matrix2D(mat);
-                    }
-                    {
-                        vigra::ArrayVector<hsize_t > shape = file.getDatasetShape("Target/Data");
-                        vigra::MultiArray<2, int32 > mat(Shape2D(shape[0], shape[1]), static_cast<int32 >(0));
-                        file.read<2, int32 >("Target/Data", mat);
-                        association.target = Matrix2D(mat);
-                    }
-
-                    associations.push_back(association);
-                    file.cd_up();
-                }
-                file.cd_up();
-
-                training.add(time, associations);
-            }
-        }
-        catch (...) {
-            std::cerr << "*Warning* Error occured when loading data the training data" << std::endl;
-            return false;
-        }
-*/
-        return true;
+			// read line by line
+			while (!ifs.eof()) {
+				ifs.getline(buf, 256);
+				std::string line(buf);
+				if (line.find_first_of("[") != std::string::npos && line.find_first_of("]") != std::string::npos) { // indicator of new event 
+					// add last association, if necessary
+					if (source.shape(0) != 0 && source.shape(0) == target.shape(0)) {
+						association.name = name;
+						association.source = source;
+						association.target = target;
+						associations.push_back(association);
+					}
+				
+					// parse event name
+					int leftBr = line.find_first_of("[");
+					int rightBr = line.find_first_of("]");
+					name = line.substr(leftBr+1, rightBr - leftBr - 1);
+					
+					// reset association object and source/target
+					association = LabelAssociation();
+					source = Matrix2D();
+					target = Matrix2D();
+				}
+				else if (line.find_first_of("->") != std::string::npos) { // annotated events
+					if (source.elementCount() == 0 && target.elementCount() == 0) { // first association for a new event
+						// dirstly assign variable source and target
+						Matrix2D source_, target_;
+						parseAnnotationLine(line, source_, target_);
+						source = transpose(source_);
+						target = transpose(target_);
+					}
+					else {
+						// cascade to source and target
+						Matrix2D source_, target_;
+						parseAnnotationLine(line, source_, target_);
+						try {
+							source = joinVertically(source, transpose(source_));
+							target = joinVertically(target, transpose(target_));
+						}
+						catch (...) {
+							std::cerr << "Fail to parse line '" << line << "' for event" << association.name << std::endl;
+							return false;
+						}
+					}
+				}
+				else { // line with unknown format, skip it
+					
+				}
+			}
+			
+			// add last association, if necessary
+			if (source.shape(0) != 0 && source.shape(0) == target.shape(0)) {
+				association.name = name;
+				association.source = source;
+				association.target = target;
+				associations.push_back(association);
+			}
+			
+			training.add(time, associations);
+            
+            ifs.close();
+		}
     };
 
     /*! A static function that saves the label associations at a given time
      *  @param filename The path to the hdf5 file
-     *  @param time The time
      *  @param associations The label associations
      *  @return Return true if no error occurs, false otherwise.
      */
-/*
-    static bool save(
-        const std::string& filename, 
-        const int32 time,
+    static bool saveAssociationFile(
+        const int time,
+        const std::string& file, 
         const LabelAssociations& associations)
     {
-        char buf[1024];
-        // load training data
-        vigra::HDF5File file(filename, vigra::HDF5File::Open);
-        try {
-            file.cd_mk("/Tracking");
-            sprintf(buf, "%08d", time);
-            file.cd_mk(buf);
-            for (int32 ind = 0; ind < associations.size(); ind ++) {
-                file.cd_mk(associations[ind].name);
-                file.cd_mk("Source");
-                vigra::MultiArray<2, int32 > source(associations[ind].source);
-                file.write("Data", source);
-                file.cd_up();
-                file.cd_mk("Target");
-                vigra::MultiArray<2, int32 > target(associations[ind].target);
-                file.write("Data", target);
-                file.cd_up();
-                file.cd_up();
-            }
-            file.cd_up();
-        }
-        catch (...) {
-            std::cerr << "*Warning* Error occured when saving the tracking results" << std::endl;
-            return false;
-        }
-
-        return true;
+        std::cerr << "\tTime=" << time << "; result=" << file << std::endl;
+        
+		std::ofstream ofs(file.c_str(), ios_base::in | ios_base::out | ios_base::trunc);
+		for (int i=0; i<associations.size(); i++) {
+			// output event name
+			LabelAssociation association = associations[i];
+			ofs << "[" << association.name << "]" << std::endl;
+			
+			// output associations
+			Matrix2D source = association.source;
+			Matrix2D target = association.target;
+			if (source.shape(0) == 0 || target.shape(0) == 0)
+				continue ;
+			for (int j=0; j<source.shape(0); j++) {
+				int k;
+				for (k=0; k<source.shape(1); k++) 
+					ofs << source(j, k) << " ";
+				ofs << "->";
+				for (k=0; k<target.shape(1); k++) 
+					ofs << " " << target(j, k);
+				ofs << std::endl;
+			}
+			ofs << std::endl;
+		}
+		
+        ofs.close();
+		return true;
     };
-*/
 
     /*! A static function that saves all the tracking solutions
      *  @param filename The path to the hdf5 file
@@ -259,12 +324,13 @@ public:
      *  @param multiplets_vec The vector of Multiplets objects
      *  @return Return true if no error occurs, false otherwise.
      */
-/*    static bool save(
-        const std::string& filename, 
+    static bool saveAssociations(
+        const std::string& outdir, 
+        const std::vector<std::string >& references, 
         const std::vector<FramePair >& framepairs, 
         const std::vector<Singlets >& singlets_vec, 
         const std::vector<Multiplets >& multiplets_vec) 
-    {
+    {   
         SolutionCoder coder;
         for (int32 time = 0; time < framepairs.size(); time ++) {
             LabelAssociations association;
@@ -273,10 +339,19 @@ public:
                 singlets_vec[time], singlets_vec[time+1], 
                 multiplets_vec[time], multiplets_vec[time+1],
                 association);
-            save(filename.c_str(), time, association);
+
+            // format the output file name
+            char file[256];
+            sprintf(file, "%08d.txt", time);
+/*            std::string file = references[time];
+            if (file.find_last_of(".tiff") != std::string::npos)
+                file = file.substr(0, file.find_last_of(".tiff"));
+            else if (file.find_last_of(".tif") != std::string::npos)
+                file = file.substr(0, file.find_last_of(".tif"));
+*/
+            saveAssociationFile(time, outdir + "/" + std::string(file), association);
         }
     };
-*/
 };
 
 }

@@ -48,23 +48,51 @@
 #include "MultipletsGenerator.hxx"
 #include "CPLEXSolverSystem.hxx"
 #include "TrackingPredictor.hxx"
-#include "HDF5ReaderWriter.hxx"
+#if defined(USE_TIFF)
+    #include "TIFFReaderWriter.hxx"
+#else
+    #include "HDF5ReaderWriter.hxx"
+#endif
 
 using namespace bot;
 
 int main(int argc, char* argv[])
 {
-        if (argc != 3) {
-                std::cerr << "********Input error, please use********" << std::endl <<
-                "                  ./TrackPredictor [hdf5 data file] [ini configuration file]" << std::endl;
-                return EXIT_FAILURE;
-        }
+#if defined(USE_TIFF)
+    if (argc != 3) {
+        std::cerr <<    "********TIFF input error, please use********" << std::endl <<
+                        "    ./TrackPredictor [root directory that contains raw, seg and training] [ini configuration file]" << std::endl <<
+                        "    Note: root dir should look like this: rootdir/raw contains .tiff files of raw images" << std::endl <<
+                        "                                       rootdir/seg contains .tiff files of segmentations" << std::endl <<
+                        "                                       rootdir/prediction outputs .txt files of predicted associations. Manually create this folder in advance!!" << std::endl;
+        return EXIT_FAILURE;
+    }
+#else
+    if (argc != 3) {
+        std::cerr <<    "********HDF5 input error, please use********" << std::endl <<
+                        "    ./TrackPredictor [hdf5 data file] [ini configuration file]" << std::endl;
+        return EXIT_FAILURE;
+    }
+#endif
 
-
-    // load the image sequence
-    std::string filename(argv[1]);
+#if defined(USE_TIFF)
+    std::string rootdir(argv[1]);
     std::vector<Matrix2D > images, segmentations;
-    HDF5ReaderWriter::load(filename.c_str(), images, segmentations);
+    std::vector<std::string > references;
+    
+    // load raw images and segmentations
+    TIFFReaderWriter::loadTiffDir(rootdir + "/raw", images, references);
+    TIFFReaderWriter::loadTiffDir(rootdir + "/seg", segmentations);
+    if (images.size() != segmentations.size()) {
+        std::cerr << "Error: number of raw images does not match number of segmentations" << std::endl;
+        return EXIT_FAILURE;
+    }
+#else
+    std::string filename(argv[1]);
+    // load the image sequence
+    std::vector<Matrix2D > images, segmentations;
+    HDF5ReaderWriter::load(filename, images, segmentations);    // load images and segmentations
+#endif
 
     // get the context
     Context context(images);
@@ -121,7 +149,14 @@ int main(int argc, char* argv[])
     }
 
     // save the solutions to the hdf file
-    HDF5ReaderWriter::save(filename, framepairs, singlets_vec, multiplets_vec);
+#if defined(USE_TIFF)
+    std::string outdir = rootdir + "/prediction";
+    std::cerr << "Output to: " << outdir << std::endl;
+    TIFFReaderWriter::saveAssociations(outdir, references, 
+        framepairs, singlets_vec, multiplets_vec);
+#else
+    HDF5ReaderWriter::save(outdir, framepairs, singlets_vec, multiplets_vec);
+#endif
 
     return EXIT_FAILURE;
 }

@@ -19,12 +19,15 @@ Limitations:
 // http://stackoverflow.com/questions/6678092/how-to-resolve-error-c2664-vswprintf-c-l-error-in-visual-studio-2005
 #include "tiffio.h"
 #include <iostream>
-#include "../include/TIFFReaderWriter.hxx"
+#include "TIFFReaderWriter.hxx"
+#include "TrainingData.hxx"
+
 
 using namespace std;
 
 int main(int argc, char* argv[])
 {
+/*
 	tsize_t row;	// Image height
 	tsize_t col;	// Image width
 	tsize_t bytes;	// Number of bytes per scanline
@@ -63,7 +66,7 @@ int main(int argc, char* argv[])
 				}	
 			}
 			else if (bps == 16) {
-/*				std::cerr << (int)row << " " << col << std::endl;
+				std::cerr << (int)row << " " << col << std::endl;
                 if (Planes == 1)
 					ImageBuffer16 = static_cast<uint16* >( _TIFFmalloc(row * col * sizeof(uint16)) );
                 if (ImageBuffer16 != NULL) {
@@ -73,11 +76,11 @@ int main(int argc, char* argv[])
 				else {
 					std::cerr << "_TIFFmalloc: fail to allocate memory!!" << std::endl;
 					return -1;
-				}*/
+				}
             }
 			else 
 				printf("Unsupported format\n\n");
-/*
+
 			// Print first row
             if(ImageBuffer != NULL) {
                 for (i=0;i<row;i++) {
@@ -98,7 +101,7 @@ int main(int argc, char* argv[])
 			if(RGBImageBuffer!=NULL)
 				for(j=0;j<col;j++)
 					printf("%x ",RGBImageBuffer[i*0+j]);
-*/
+
 		}
 		while (TIFFReadDirectory(tifPtr));
 		
@@ -107,11 +110,30 @@ int main(int argc, char* argv[])
 		if(RGBImageBuffer!=NULL)_TIFFfree(RGBImageBuffer);
 		TIFFClose(tifPtr);
 	}
-
+*/
 
 	// try TIFFReaderWriter
-	Matrix2D image = Matrix2D(Matrix2D::difference_type((int)row, (int)col));
-	std::cerr << "good here" << std::endl;
-	Matrix2D out2d = TIFFReaderWriter::loadTiff(argv[1]);
-	std::cout << "\n" << out2d << std::endl;
+	
+	Matrix2D out2d;
+	if (TIFFReaderWriter::loadTiff(argv[1], out2d)) {
+		std::cout << "\n" << out2d << std::endl;
+		return 0;
+	}
+
+	// try load images from a directory
+	std::   vector<Matrix2D > images;
+	std::vector<std::string > files;
+	if (TIFFReaderWriter::loadTiffDir(std::string(argv[1]) + "/raw", images, files)) {
+		if (files.size() > 0) {
+			for (int i=0; i<images.size(); i++) {
+    			std::cout << i << " - " << files[i] << ": " << images[i].shape(0) << " x " << images[i].shape(1) << std::endl;
+			}
+		}
+	}
+
+	// try load annotations
+	TrainingData training;
+	TIFFReaderWriter::loadAnnotationDir(std::string(argv[1])+"/training", files, training);	
+    
+	return 0;
 }

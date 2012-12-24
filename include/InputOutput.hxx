@@ -43,12 +43,21 @@
 #ifndef __INPUT_OUTPUT_HXX__
 #define __INPUT_OUTPUT_HXX__
 
+#include <stdio.h>
 #include "Singlet.hxx"
 #include "Multiplet.hxx"
 #include "Event.hxx"
 #include "Context.hxx"
 #include "EventConfiguration.hxx"
 #include "objectFeatures.hxx"
+#include "VigraSTLInterface.hxx"
+#include <algorithm>
+#include <fstream>
+#include <vector>
+#include <iostream>
+#include <string>
+#include <dirent.h>
+#include "vigra/matrix.hxx"
 
 using namespace bot;
 
@@ -112,5 +121,17 @@ std::ostream& operator<< (std::ostream& o, const LabelAssociations& vec);
 std::ostream& operator<< (std::ostream& o, const std::map<int32, int32 >& m);
 
 std::ostream& operator<< (std::ostream& o, const std::map<std::pair<int32, int32 >, int32 >& m);
+
+
+bool stringCompare( const std::string &left, const std::string &right);
+
+std::vector<std::string > getFilesInDir(const std::string& dir, const std::string& filter_ext = ".*");
+
+int countCommonPostfix(const std::string& str1, const std::string& str2);
+
+int findRawFileIndex(const std::vector<std::string >& files, const std::string& file);
+
+// This function parse an annotation string such as "45 -> 43 32"
+//bool parseAnnotationLine(const std::string& line, Matrix2D source, Matrix2D target);
 
 #endif /* __INPUT_OUTPUT_HXX__ */
