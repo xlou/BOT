@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 #if defined(USE_TIFF)
     if (argc != 3) {
         std::cerr <<    "********TIFF input error, please use********" << std::endl <<
-                        "    ./TrackPredictor [root directory that contains raw, seg and training] [ini configuration file]" << std::endl <<
+                        "    ./TrackTrainer [root directory that contains raw, seg and training] [ini configuration file]" << std::endl <<
                         "    Note: root dir should look like this: rootdir/raw contains .tiff files of raw images" << std::endl <<
                         "                                       rootdir/seg contains .tiff files of segmentations" << std::endl <<
                         "                                       rootdir/training contains .txt files of training associations" << std::endl;
