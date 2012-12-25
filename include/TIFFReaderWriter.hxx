@@ -43,16 +43,16 @@
 #ifndef __TIFF_READER_WRITER_HXX
 #define __TIFF_READER_WRITER_HXX
 
+#include "tiffio.h"
 #include <stdio.h>
 #include <vector>
 #include <iostream>
 #include <string>
-#include "tiffio.h"
 #include "TypeDefinition.hxx"
 #include "SolutionCoder.hxx"
 #include "TrainingData.hxx"
 #include "InputOutput.hxx"
-#include <dirent.h>
+#include "FramePair.hxx"
 #include <algorithm>
 #include <fstream>
 #include <vigra/matrix.hxx> 
@@ -290,7 +290,12 @@ public:
     {
         std::cerr << "\tTime=" << time << "; result=" << file << std::endl;
         
-		std::ofstream ofs(file.c_str(), ios_base::in | ios_base::out | ios_base::trunc);
+		std::ofstream ofs(file.c_str(), std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
+		if (!ofs) {
+			std::cerr << "Fail to create output file: " << file << std::endl;
+			return false;
+		}
+
 		for (int i=0; i<associations.size(); i++) {
 			// output event name
 			LabelAssociation association = associations[i];
@@ -349,8 +354,11 @@ public:
             else if (file.find_last_of(".tif") != std::string::npos)
                 file = file.substr(0, file.find_last_of(".tif"));
 */
-            saveAssociationFile(time, outdir + "/" + std::string(file), association);
+			if (!saveAssociationFile(time, outdir + "/" + std::string(file), association))
+				return false;
         }
+
+		return true;
     };
 };
 

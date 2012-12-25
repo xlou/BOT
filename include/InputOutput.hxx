@@ -56,7 +56,11 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include <dirent.h>
+#if defined(_WIN32)
+	#include "dirent-win/dirent.h"
+#else
+	#include <dirent.h>
+#endif
 #include "vigra/matrix.hxx"
 
 using namespace bot;
@@ -84,17 +88,17 @@ std::ostream& operator<< (std::ostream& o, const Multiplets& obj_list);
 template<class t_elem >
 std::ostream& operator<< (std::ostream& o, const std::vector<std::pair<t_elem, t_elem > >& vec);
 
-std::ostream& operator<< (std::ostream& o, const std::map<int32, int32 >& map);
+std::ostream& operator<< (std::ostream& o, const std::map<int, int >& map);
 
-std::ostream& operator<< (std::ostream& o, const std::map<int32, double >& map);
+std::ostream& operator<< (std::ostream& o, const std::map<int, double >& map);
 
-std::ostream& operator << (std::ostream& o, const std::pair<int32, int32 >& p);
+std::ostream& operator << (std::ostream& o, const std::pair<int, int >& p);
 
-std::ostream& operator << (std::ostream& o, const std::vector<std::pair<int32, int32 > >& vec);
+std::ostream& operator << (std::ostream& o, const std::vector<std::pair<int, int > >& vec);
 
 std::ostream& operator << (std::ostream& o, const std::vector<double >& vec);
 
-std::ostream& operator << (std::ostream& o, const std::vector<int32 >& vec);
+std::ostream& operator << (std::ostream& o, const std::vector<int >& vec);
 
 std::ostream& operator << (std::ostream& o, const std::vector<std::string >& vec);
 
@@ -118,9 +122,9 @@ std::ostream& operator<< (std::ostream& o, const LabelAssociation& a);
 
 std::ostream& operator<< (std::ostream& o, const LabelAssociations& vec);
 
-std::ostream& operator<< (std::ostream& o, const std::map<int32, int32 >& m);
+std::ostream& operator<< (std::ostream& o, const std::map<int, int >& m);
 
-std::ostream& operator<< (std::ostream& o, const std::map<std::pair<int32, int32 >, int32 >& m);
+std::ostream& operator<< (std::ostream& o, const std::map<std::pair<int, int >, int >& m);
 
 
 bool stringCompare( const std::string &left, const std::string &right);

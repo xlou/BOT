@@ -40,6 +40,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdio.h>
+#if defined(USE_TIFF)
+    #include "TIFFReaderWriter.hxx"
+#else
+    #include "HDF5ReaderWriter.hxx"
+#endif
 #include "InputOutput.hxx"
 #include "HypothesisSpace.hxx"
 #include "ObjectFeatureExtractor.hxx"
@@ -48,11 +54,6 @@
 #include "MultipletsGenerator.hxx"
 #include "CPLEXSolverSystem.hxx"
 #include "TrackingPredictor.hxx"
-#if defined(USE_TIFF)
-    #include "TIFFReaderWriter.hxx"
-#else
-    #include "HDF5ReaderWriter.hxx"
-#endif
 
 using namespace bot;
 
@@ -110,7 +111,7 @@ int main(int argc, char* argv[])
     SingletsGenerator singletsGenerator;
     MultipletsGenerator multipletsGenerator(conf.k(), conf.d_max());
     ObjectFeatureExtractor objectFeatureExtractor(conf.get_feature_names(), context);
-    for (int32 indT = 0; indT < images.size(); indT ++) {
+    for (int indT = 0; indT < images.size(); indT ++) {
         // generate singlets and multiplets
         Singlets singlets = singletsGenerator(images[indT], segmentations[indT]);
         Multiplets multiplets = multipletsGenerator(images[indT], segmentations[indT], singlets);
@@ -142,7 +143,7 @@ int main(int argc, char* argv[])
     TrackingPredictor predictor;
     std::vector<FramePair >& framepairs = space.framepairs();
     const std::vector<Matrix2D > null_vector;
-    for (int32 ind = 0; ind < framepairs.size(); ind ++) {
+    for (int ind = 0; ind < framepairs.size(); ind ++) {
         Solution& solution = framepairs[ind].solution(); 
         std::string msg = predictor(framepairs[ind], conf.weights(), solution, null_vector);
         std::cout << "T = " << ind << "; cplex returns: " << msg << std::endl;

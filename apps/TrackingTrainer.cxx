@@ -40,6 +40,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdio.h>
+#if defined(USE_TIFF)
+    #include "TIFFReaderWriter.hxx"
+#else
+    #include "HDF5ReaderWriter.hxx"
+#endif
 #include "InputOutput.hxx"
 #include "HypothesisSpace.hxx"
 #include "ObjectFeatureExtractor.hxx"
@@ -51,11 +57,6 @@
 #include "SolutionCoder.hxx"
 #include "TrainingData.hxx"
 #include "TrackingTrainer.hxx"
-#if defined(USE_TIFF)
-    #include "TIFFReaderWriter.hxx"
-#else
-    #include "HDF5ReaderWriter.hxx"
-#endif
 
 using namespace bot;
 
@@ -119,7 +120,7 @@ int main(int argc, char* argv[])
     SingletsGenerator singletsGenerator;
     MultipletsGenerator multipletsGenerator(conf.k(), conf.d_max());
     ObjectFeatureExtractor extractor(conf.get_feature_names(), context);
-    for (int32 indT = 0; indT < images.size(); indT ++) {
+    for (int indT = 0; indT < images.size(); indT ++) {
         // generate singlets and multiplets
         Singlets singlets = singletsGenerator(images[indT], segmentations[indT]);
         Multiplets multiplets = multipletsGenerator(images[indT], segmentations[indT], singlets);
@@ -145,9 +146,9 @@ int main(int argc, char* argv[])
     // parse the training data
     std::cout << "****Parsing the training data****" << std::endl;
     SolutionCoder coder;
-    int32 nTr = training.times().size();
-    for (int32 ind = 0; ind < nTr; ind ++) {
-        int32 time = training.times()[ind];
+    int nTr = training.times().size();
+    for (int ind = 0; ind < nTr; ind ++) {
+        int time = training.times()[ind];
         std::cout << "****time = " << time << "****" << std::endl;
         const LabelAssociations& association = training.associations()[ind];
 
@@ -168,7 +169,11 @@ int main(int argc, char* argv[])
     }
 
     // start the training
-    TrackingTrainer trainer;
+	double epsilon = 1e-4;
+	double eta = 1e-12;
+	double lambda = 1e-8;
+	double max_iter = 500;
+    TrackingTrainer trainer(epsilon, eta, lambda, max_iter);
     const std::vector<Matrix2D > null_vector;
     std::vector<Matrix2D > weights = conf.weights(0.5);
     std::string msg = trainer(training, framepairs, weights, true);

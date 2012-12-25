@@ -3182,7 +3182,7 @@ public:
 # endif
 #endif
 
-#include <windows.h>
+#include <vigra/windows.h>
 #ifdef SI_NO_MBCS
 # define SI_NoCase   SI_GenericNoCase
 #else // !SI_NO_MBCS

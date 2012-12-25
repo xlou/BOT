@@ -43,5 +43,5 @@ ADD_EXECUTABLE(test-ConvexImage test-ConvexImage.cxx ${BOT_ALL_SOURCE})
 ADD_EXECUTABLE(test-CplexSolver
     test-CplexSolver.cxx)
 SET_TARGET_PROPERTIES(test-CplexSolver PROPERTIES LINK_FLAGS "-lm -pthread")
-TARGET_LINK_LIBRARIES(test-CplexSolver tiff ilocplex cplex concert)
+TARGET_LINK_LIBRARIES(test-CplexSolver tiff ilocplex concert ${CPLEX_LIBNAME})
 

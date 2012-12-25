@@ -19,6 +19,8 @@ SET(HDF5_INSTALL_PATH "" CACHE PATH "Additional install path for HDF5")
 SET(CPLEX_BASE_PATH "" CACHE PATH "Additional install path for cplex")
 SET(CPLEX_SYSTEM "x86-64_sles10_4.1" CACHE PATH "Specify the system of cplex")
 SET(CPLEX_LIBFORMAT "static_pic" CACHE PATH "Specify the library format of cplex")
+SET(CPLEX_LIBNAME "cplex" CACHE PATH "Specify the cplex library name")
+
 
 # Additional header files
 INCLUDE_DIRECTORIES(
