@@ -15,8 +15,17 @@ http://hci.iwr.uni-heidelberg.de/Staff/xlou/research/tracking.html
 or, take a look at ./doc.
 
 
-Note: This library has been compiled and tested under linux. If you find any problem compiling or running it under other platforms, please let the author know.
+Note: This library has been compiled and tested under
+1. Linux 32-bit and 64-bit;
+2. Windows 32-bit;
+3. Mac (by Jonathan Mackenzie, jpm67@cam.ac.uk)
+
+If you find any problem compiling or running it under other platforms, please let the author know.
+
+We thank the following users for their useful feedback:
+* Jan Funke for spotting errors in the TrckingTrainer class;
+* Bernhard Kausler for many suggestins;
+* Jonathan Mackenzie for bug reports;
+* Sébastien Tosi for help on incorporating libtiff.
 
 (C) Xinghua Lou (xinghua.lou@iwr.uni-heidelberg.de, xinghua.lou@gmail.com)
-
-
